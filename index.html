@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>TR's Decision Maker - Mr. McKenzie's Historical Randomizer</title>
+    <style>
+        body {
+            font-family: 'Georgia', serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f4e4bc;
+            color: #2c1810;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            color: #4a2511;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .coin-container {
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .coin {
+            width: 200px;
+            height: 200px;
+            background: #b87333;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto;
+            cursor: pointer;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+            border: 8px solid #8b4513;
+            box-shadow: 0 0 20px rgba(0,0,0,0.3);
+        }
+        
+        .coin.flipping {
+            animation: flip 2s linear;
+        }
+        
+        @keyframes flip {
+            0% { transform: rotateY(0); }
+            100% { transform: rotateY(720deg); }
+        }
+        
+        .coin img {
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+        }
+        
+        .options {
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            margin: 20px 0;
+        }
+        
+        .option-row {
+            display: flex;
+            margin: 10px 0;
+            align-items: center;
+        }
+        
+        input {
+            padding: 8px;
+            margin: 0 10px;
+            border: 1px solid #8b4513;
+            border-radius: 4px;
+        }
+        
+        button {
+            background: #8b4513;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1.1em;
+            margin: 10px;
+            transition: background 0.3s;
+        }
+        
+        button:hover {
+            background: #6b3410;
+        }
+        
+        .quote {
+            font-style: italic;
+            text-align: center;
+            margin: 20px 0;
+            color: #4a2511;
+        }
+        
+        .result {
+            font-size: 1.5em;
+            font-weight: bold;
+            text-align: center;
+            margin: 20px 0;
+            color: #4a2511;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>TR's Decision Maker</h1>
+        <h2>Mr. McKenzie's Historical Randomizer</h2>
+        <div class="quote">"In any moment of decision, the best thing you can do is the right thing." - Theodore Roosevelt</div>
+    </div>
+
+    <div class="options">
+        <h3>Set Your Options</h3>
+        <div id="optionContainer">
+            <div class="option-row">
+                <input type="text" placeholder="Option 1" class="option-input">
+                <input type="number" placeholder="Probability %" class="prob-input" min="0" max="100">
+            </div>
+        </div>
+        <button onclick="addOption()">Add Option</button>
+        <button onclick="removeOption()">Remove Option</button>
+    </div>
+
+    <div class="coin-container">
+        <div class="coin" onclick="flip()">
+            <img src="" alt="Theodore Roosevelt Coin">
+        </div>
+    </div>
+
+    <div class="result" id="result"></div>
+
+    <button onclick="flip()" style="display: block; margin: 20px auto;">BULLY! (Flip the Coin)</button>
+
+    <script>
+        function addOption() {
+            const container = document.getElementById('optionContainer');
+            const newRow = document.createElement('div');
+            newRow.className = 'option-row';
+            newRow.innerHTML = `
+                <input type="text" placeholder="Option ${container.children.length + 1}" class="option-input">
+                <input type="number" placeholder="Probability %" class="prob-input" min="0" max="100">
+            `;
+            container.appendChild(newRow);
+        }
+
+        function removeOption() {
+            const container = document.getElementById('optionContainer');
+            if (container.children.length > 1) {
+                container.removeChild(container.lastChild);
+            }
+        }
+
+        function validateProbabilities() {
+            const probInputs = document.querySelectorAll('.prob-input');
+            let total = 0;
+            probInputs.forEach(input => {
+                total += Number(input.value) || 0;
+            });
+            return Math.abs(total - 100) < 0.01;
+        }
+
+        function flip() {
+            if (!validateProbabilities()) {
+                alert("Probabilities must sum to 100%!");
+                return;
+            }
+
+            const coin = document.querySelector('.coin');
+            const result = document.getElementById('result');
+            
+            // Get all options and their probabilities
+            const options = [];
+            const optionRows = document.querySelectorAll('.option-row');
+            optionRows.forEach(row => {
+                const option = row.querySelector('.option-input').value;
+                const prob = Number(row.querySelector('.prob-input').value) || 0;
+                if (option && prob > 0) {
+                    options.push({ text: option, probability: prob });
+                }
+            });
+
+            if (options.length < 2) {
+                alert("Please add at least two options with probabilities!");
+                return;
+            }
+
+            // Hide previous result
+            result.style.opacity = 0;
+
+            // Add flipping animation
+            coin.classList.add('flipping');
+
+            // Generate random result based on probabilities
+            const random = Math.random() * 100;
+            let cumulative = 0;
+            let selectedOption = options[options.length - 1].text;
+
+            for (let option of options) {
+                cumulative += option.probability;
+                if (random <= cumulative) {
+                    selectedOption = option.text;
+                    break;
+                }
+            }
+
+            // Show result after animation
+            setTimeout(() => {
+                coin.classList.remove('flipping');
+                result.textContent = `BULLY! The result is: ${selectedOption}`;
+                result.style.opacity = 1;
+            }, 2000);
+        }
+    </script>
+</body>
+</html>
