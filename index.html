@@ -145,13 +145,11 @@
         }
 
         .coin-image {
-            width: 90%; /* Adjust as needed */
+            width: 100%; /* Make it fill the coin */
             height: auto; /* Maintain aspect ratio */
             border-radius: 50%; /* Ensure the image fits within the circular bounds */
-        }
-
-        .upside-down-image {
-            transform: rotate(180deg); /* Flip the image upside down */
+            object-fit: cover; /* Crop the image to fit */
+            object-position: top; /* Focus on the upper part of the image */
         }
 
         @keyframes flip {
@@ -195,9 +193,6 @@
         <div class="coin" onclick="flip()">
             <div class="coin-face regular">
                 <img src="src/mckenzie.webp" alt="Face" class="coin-image">
-            </div>
-            <div class="coin-face upside-down">
-                <img src="src/mckenzie.webp" alt="Face" class="coin-image upside-down-image">
             </div>
         </div>
 
